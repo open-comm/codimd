@@ -1,0 +1,52 @@
+## docker-compose configuration file for codimd collaborative 
+## markdown editor
+## 
+## To configure this service, edit the `.env` file
+##
+
+version: '3'
+
+services:
+  database:
+    image: postgres:11.6-alpine
+    environment:
+      - POSTGRES_USER=codimd
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=codimd
+    volumes:
+      - ./database-data:/var/lib/postgresql/data
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - traefik_network
+    restart: always
+  codimd:
+    image: hackmdio/hackmd:2.4.1
+    environment:
+      - CMD_DB_URL=postgres://codimd:${DB_PASSWORD}@database/codimd
+      - CMD_USECDN=false
+    labels:
+      - traefik.port=3000
+      - "traefik.http.routers.${ROUTERNAME}.rule=Host(${DOMAIN})"
+      - "traefik.http.routers.${ROUTERNAME}.entrypoints=websecure"
+      - "traefik.http.routers.${ROUTERNAME}.tls.certresolver=myresolver"
+    depends_on:
+      - database
+    networks:
+      - traefik_network
+#    ports:
+#      - "3000:3000"
+    volumes:
+      - ./upload-data:/home/hackmd/app/public/uploads
+    restart: always
+
+#volumes:
+#  database-data: {}
+#  upload-data: {}
+
+networks:
+  traefik_network:
+    external:
+      name: traefik_default
+
+
