@@ -26,6 +26,7 @@ services:
       - CMD_DB_URL=postgres://codimd:${DB_PASSWORD}@database/codimd
       - CMD_USECDN=false
     labels:
+      - "traefik.enable=true"
       - traefik.port=3000
       - "traefik.http.routers.${ROUTERNAME}.rule=Host(${DOMAIN})"
       - "traefik.http.routers.${ROUTERNAME}.entrypoints=websecure"
@@ -40,9 +41,6 @@ services:
       - ./upload-data:/home/hackmd/app/public/uploads
     restart: always
 
-#volumes:
-#  database-data: {}
-#  upload-data: {}
 
 networks:
   traefik_network:
